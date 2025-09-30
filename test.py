@@ -1,29 +1,13 @@
-from utils.llm import custom_elm
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import CharacterTextSplitter
-from langchain_chroma import Chroma
+from langchain_core.prompts import PromptTemplate
+from llm.llm import llm
 
-# 文档切分
-raw_documents = TextLoader('1.txt').load()
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-documents = text_splitter.split_documents(raw_documents)
+# 1.创建提示词模板
+prompt = PromptTemplate.from_template(template = "{foo}{bar}")
 
-q = 'What did the president say about Ketanji Brown Jackson'
+# 2.实时输入部分
+partial_prompt1 = prompt.partial(foo="foo")			
 
-# Chroma 向量库（持久化到本地）
-chroma_db = Chroma(
-    collection_name="user_memories",
-    embedding_function=custom_elm,
-    persist_directory="./chroma_db"  # 持久化路径
-)
+# 3.最终提示词
+print(partial_prompt1.format())
 
-# 构建chorma数据库
-db = chroma_db.from_documents(documents, custom_elm)
-
-# 搜索1
-docs1 = db.similarity_search(q)
-print('-=-=\n',docs1)
-# 搜索2
-ev = custom_elm.embed_query(q)
-docs2 = db.similarity_search_by_vector(ev)
-print('-=-=\n',docs2)
+print(llm.invoke(foo='xx'))
